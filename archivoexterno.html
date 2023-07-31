@@ -1,0 +1,114 @@
+{% extends "layoutBootstrap.twig" %} {% block content %} {% set regPerPage = 20
+    %} {% set totalPages = (products|length / regPerPage)|round(0, 'ceil') %} {% set
+    totalProducts = products|length %} {% set initReg = 0 %} {% set subTotal = 0 %}
+    {% set totalQty = 0 %} {% set pullOrder = 'false' %} {% set pullOrderReason = ''
+    %} {% set futureOrderDate = '' %} {% set additionalInformation = '' %} {% set
+    mailOrderMessages = '' %} {% set comments = '' %} {% set paymentType = '' %} {%
+    set foot = false %} {% set marginTop = '' %} {% set salto = ' ' %} {% set
+    payment = '' %} {% set amountRemitted = '' %} {% for i in 1..totalPages %} Box:
+    {{ order.packaging }} {{ positionBatch }} {% set loyal =
+    loyalty(order.attributes) %} {% if loyal.loyalty is defined %} {# {% set offset
+    = 'col-xs-offset-1' %} #} {% if loyal.loyalty == 'true' %} Puritan's Perks ID:
+    {{ loyal.loyaltyNumber }} Current Tier: {{ loyal.loyaltyTyer }} Current points
+    as of {{ order.orderDate |date("m/d/Y") }} : {{ loyal.loyaltyPoints }} Points
+    will be issued for items below{% else %} You could have earned Puritan Perks
+    points for this purchase! Visit WWW.PURITAN.COM/PERKS or call 1-800-645-1030 to
+    learn more {% endif %} {% else %} You could have earned Puritan Perks points for
+    this purchase! Visit WWW.PURITAN.COM/PERKS or call 1-800-645-1030 to learn more
+    {% endif %} {% set customerNumber = "" %} {% if order.attributes is defined %}
+    {% for attr in order.attributes %} {% if attr.Attribute is defined %} {% if
+    attr.Attribute == 'payment' %} {% set payment = attr.AttrVal %} {% endif %} {%
+    if attr.Attribute == 'amount_remitted' %} {% set amountRemitted = attr.AttrVal
+    %} {% endif %} {% if attr.Attribute == "customer_number" %} {% set
+    customerNumber = "#{attr.AttrVal}" %} {% endif %} {% if attr.Attribute ==
+    'pull_order' %} {% set pullOrder = attr.AttrVal %} {% endif %} {% if
+    attr.Attribute == 'pull_order_reason' %} {% set pullOrderReason = attr.AttrVal
+    %} {% endif %} {% if attr.Attribute == 'future_order_date' %} {% set
+    futureOrderDate = attr.AttrVal %} {% endif %} {% if attr.Attribute ==
+    'additional_information' %} {% set additionalInformation = attr.AttrVal %} {%
+    endif %} {% if attr.Attribute == 'mail_order_messages' %} {% set
+    mailOrderMessages = attr.AttrVal %} {% endif %} {% if attr.Attribute ==
+    'comments' %} {% set comments = attr.AttrVal %} {% endif %} {% if attr.Attribute
+    == 'payment_type' %} {% set paymentType = attr.AttrVal %} {% endif %} {% endif
+    %} {% endfor %} {% endif %} {% if customerNumber == "" %} {% else %} {% endif %}
+    Cust #: {{ order.orderNum }} {{ customerNumber }} PG # : PG # : {{ i }} / {{
+    totalPages }} Order #: {{ order.orderRef }} Date : Date : {{ "now"|date("m/d/Y")
+    }} {{ order.custName }} {{ order.custCompany }} {{ order.custAddress1 }} {{
+    order.custAddress2 }} {{ order.custCity }}, {{ order.custState }}, {{
+    order.custZip }} {{ order.custCountry }} {# {{ order.email }} {{ order.phone }}
+    #} {% if (order.custFName == order.custBillFName and order.custLName ==
+    order.custBillLName and order.custAddress1 == order.custBillAddress1 and
+    order.custAddress2 == order.custBillAddress2 and order.custCompany ==
+    order.custBillCompany and order.custCity == order.custBillCity and
+    order.custState == order.custBillState and order.custZip == order.custBillZip
+    and order.custCountry == order.custBillCountry) %} {% set salto = '' %} {% set
+    marginTop = '' %} {% else %} {{ order.custBillName }} {{ order.custBillCompany
+    }} {{ order.custBillAddress1 }} {{ order.custBillAddress2 }} {{
+    order.custBillCity }}, {{ order.custBillState }}, {{ order.custBillZip }} {{
+    order.custBillCountry }} {% set marginTop = '60px' %} {% endif %} {% if
+    marginTop == '' %} {% else %} {% endif %} {{ salto | raw }} {% if kind ==
+    'international' %} {% endif %} {% for k,product in products | slice(initReg,
+    regPerPage) %} {% if kind == 'international' %} {% endif %} {% set n = kind ==
+    'international' ? 6 : ( kind == 'invoice' ? 4 : 3 ) %} {% set serials =
+    product.serials is not empty ? " Serials: #{product.serials}" %} {% set lote =
+    product.lot is not empty or product.expir is not empty or product.uom is not
+    empty ? " " : "" %} {% set location = product.location is not empty ? "Location:
+    #{product.location}" %} {% set bin = product.bin is not empty ? "Bin:
+    #{product.bin}" : "" %} {% set binTag = product.binTag is not empty ? "Bintag:
+    #{product.binTag}" : "" %} {% set upc = product.upc is not empty ? "UPC:
+    #{product.upc}" : "" %} {% if product.lot is not empty %} {% set lote = "#{lote}
+    Lot#: #{product.lot}" %} {% endif %} {% if product.expir is not empty %} {% set
+    lote = "#{lote} Expir: #{product.expir}" %} {% endif %} {% if product.uom is not
+    empty %} {% set lote = "#{lote} UOM: #{product.uom}" %} {% endif %} {% set
+    producers = product.procedureIds is not empty ? "Procedure#:
+    #{product.procedurIds}" : "" %} {% if product.qty is empty %} {% set qty = 1 %}
+    {% else %} {% set qty = product.qty %} {% endif %} {% if product.sku is not
+    empty %} {% set subTotal = subTotal + (product.soldPrice * qty) %} {% else %} {%
+    if 'TOTAL SALES TAX' not in product.description %} {% set subTotal = subTotal +
+    (product.soldPrice * qty) %} {% else %} {% set subTotal = subTotal +
+    product.soldPrice %} {% endif %} {% endif %} {% set totalQty = totalQty + qty %}
+    {% endfor %} {% if kind == 'invoice' or kind == 'international' %} {% else %} {%
+    if i == totalPages %} {% else %} {% endif %} {% endif %} Qty SKU Description
+    Country of Origin Tarrif Code Amount Comments {{ product.qty }} {{
+    product.clientOpt1|striptags|slice(0, 8) }} {{ product.description }} {{
+    product.countryOrig }} {{ product.tariffCode }} {% if product.soldPrice == '' %}
+    {% if 'ABOVE ITEMS TAXED' in product.description %} {% else %} 0.00 {% endif %}
+    {% else %} {% if product.qty is empty %} {{ ( product.soldPrice | round(2) |
+    number_format(2, '.', ',') ) }} {% else %} {{ ( (product.soldPrice *
+    product.qty) | round(2) ) | number_format(2, '.', ',') }} {% endif %} {% endif
+    %} {% if kind == 'international' %} I DECLARE ALL THE INFORMATION CONTAINED IN
+    THIS INVOICE IS TRUE AND CORRECT TO THE BEST OF MY KNOWLEDGE. NAME: SIGNATURE:{{
+    shipperInfo.name }} DATE:{{ 'now'|date('Y-m-d') }} SHIPPERâ€™S TAX NUMBER:{{
+    shipperInfo.tax }} {% endif %} {% if order.custComments is not empty %} Note to
+    Warehouse: {{ order.custComments }} {% endif %} {% if order.orderComments != ''
+    %} Note to customer: {{ order.orderComments }} {% endif %} {% set subtotal =
+    handlingAtt is not empty or shippingAtt is not empty ? " SUBTOTAL: " : "" %} {%
+    set handling = handlingAtt is not empty ? " HANDLING: " : "" %} {% set shipping
+    = shippingAtt is not empty ? " SHIPPING: " : "" %} {{ subtotal }} {{ handling }}
+    {{ shipping }} TOTAL: {% set subtotal = handlingAtt is not empty or shippingAtt
+    is not empty ? " #{ subTotalAtt is not empty ? subTotalAtt : subTotal } " : ""%}
+    {% set handling = handlingAtt is not empty ? " #{handlingAtt} " : "" %} {% set
+    shipping = shippingAtt is not empty ? " #{shippingAtt} " : "" %} {{ subtotal }}
+    {{ handling }} {{ shipping }} {% set total = handlingAtt + shippingAtt +
+    subTotalAtt is not empty ? subTotalAtt : subTotal %} {{ subTotalAtt is not empty
+    ? subTotalAtt ? total }} .: CONTINUE ON NEXT PAGE :. {{ additionalInformation }}
+    {# #} {% if i == totalPages %} {% if mailOrderMessages != '' %} {% set foot =
+    true %} {{ mailOrderMessages }} {{ comments }} {% endif %} {% if ( loyal.loyalty
+    is defined and loyal.loyalty == 'true') %} {% set total = subTotal +
+    loyal.postAge|number_format(2) - loyal.discount|number_format(2) -
+    loyal.perksReward|number_format(2) - loyal.shippingCredit|number_format(2) %}
+    YOUR {{ loyal.paymentType | upper }} CREDIT CARD HAS BEEN CHARGED ${{
+    subTotal|number_format(2) }} FOR THIS SHIPMENT {% else %} {% if payment ==
+    'CHECK' or payment == 'MONEY ORDER' or payment == 'CASH' or payment == 'WIRE
+    TRANSFER' %} AMOUNT SENT ${{ amountRemitted|number_format(2) }} SHIPMENT TOTAL
+    ${{ subTotal|number_format(2) }} {% else %} {# {% if payment == 'CC' or payment
+    == 'CC_MAIL' %} #} YOUR {{ paymentType | upper }} CREDIT CARD HAS BEEN CHARGED
+    ${{ subTotal|number_format(2) }} FOR THIS SHIPMENT {# {% endif %} #} {% endif %}
+    {% endif %} {% if totalPages == 1 %} {% if siOrderNum == "" %} {{ orderId }} {%
+    else %} {{ siOrderNum }} {% endif %} {% endif %} {% if pullOrder == 'true' %} {%
+    set foot = true %} SPECIAL SHIPPING REQUEST: {{ pullOrderReason|upper }} {{
+    futureOrderDate }} {% endif %} {% else %} {% if i == 1 %} {% if siOrderNum == ""
+    %} {{ orderId }} {% else %} {{ siOrderNum }} {% endif %} {% endif %} {% set foot
+    = true %} {% endif %} {# #} {% set initReg = initReg + regPerPage %} {% endfor
+    %} {% endblock %}
+    
